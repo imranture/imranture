@@ -1,4 +1,7 @@
-### Hi there 👋
+# Hi there 👋 I'm Imran!
+
+## I am an engineer based in Melbourne, and I enjoy solving challenging real world problems using data.
+
 - 🔭 I’m currently working on a project.
 - ⚡ Fun fact: I've lived on four continents and in five countries, as of today.
 
