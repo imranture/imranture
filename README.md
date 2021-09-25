@@ -1,7 +1,7 @@
 # Hi 👋 I'm Imran!
 
-- 💼 I am an engineer based in Melbourne.
-- ⚡ I turn data into insights and build apps to make lives easier.
+- 💼 I am a research scholar & lecturer based in Melbourne.
+- ⚡ I turn data into insights and actionable recommendations.
 - 😮 Fun fact: I've lived on four continents and in five countries, as of today.
 - 📧 How to reach me: imran at alumni.rutgers.edu
 <!--
