@@ -2,6 +2,7 @@
 
 - 💼  I am a research scholar & lecturer based in Melbourne.
 - ⚡  I turn data into insights and actionable recommendations.
+- 🌱 I’m currently learning deep learning applications on time-series.
 - 😮  Fun fact: I've lived on four continents and in five countries, so far.
 - 📧  How to reach me: imran at alumni.rutgers.edu
 <!--
