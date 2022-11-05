@@ -2,7 +2,7 @@
 
 - 💼  I am a research scholar & lecturer based in Melbourne.
 - ⚡  I turn data into insights and actionable recommendations.
-- 😮  Fun fact: I've lived on four continents and in five countries, as of today.
+- 😮  Fun fact: I've lived on four continents and in five countries, so far.
 - 📧  How to reach me: imran at alumni.rutgers.edu
 <!--
 **imranture/imranture** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
