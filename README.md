@@ -1,6 +1,6 @@
 # Hi 👋 I'm Imran!
 
-- 💼  I am a research scholar & lecturer based in Melbourne.
+- 💼  I am a machine learning researcher.
 - ⚡  I turn data into insights and actionable recommendations.
 - 🌱 I’m currently learning deep learning applications on time-series and forecasting.
 - 😮  Fun fact: I've lived on four continents and in five countries, so far.
