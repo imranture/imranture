@@ -1,8 +1,8 @@
 # Hi 👋 I'm Imran!
 
-- 💼  I am a machine learning researcher.
-- 🔭 I’m currently working on emotion recognition using physiological signals.
-- 🌱 I’m currently learning deep learning applications on time-series and forecasting.
+- 💼  I am a data scientist.
+- 🔭 I’m currently working on deep learning applications.
+- 🌱 I’m upskilling in AI.
 - 😮  Fun fact: I've lived on four continents and in five countries, so far.
 - 📧  How to reach me: imran at alumni.rutgers.edu
 <!--
