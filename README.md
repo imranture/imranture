@@ -1,4 +1,4 @@
-# Hi 👋 I'm Imran!
+# Hi, I'm Imran!
 
 - 💼  I am a data scientist.
 - 🔭 I’m currently working on deep learning applications.
