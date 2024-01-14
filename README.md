@@ -1,5 +1,7 @@
 # Hi, I'm Imran!
 
+<img src="https://github.com/imranture/imranture/blob/main/tea.gif?raw=true" width=250 height=250> <img src="https://github.com/imranture/imranture/blob/main/coding.gif?raw=true" width=250 height=250>
+
 ### About me
 💼  I am a data scientist. 
 
