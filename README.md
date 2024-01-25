@@ -3,7 +3,7 @@
 ### About me
 💼  I am a data scientist. 
 
-🔭 I’m currently working on deep learning applications. 
+🔭 I’m currently working on deep learning based time-series forecasting.
 
 🌱 I’m upskilling in AI. 
 
