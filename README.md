@@ -1,7 +1,7 @@
 # Hi, I'm Imran!
 
 ### About me
-💼  I am a data scientist. 
+💼  I am a senior business analyst for ai and optimization.
 
 🔭 I’m currently working on deep learning based time-series forecasting.
 
