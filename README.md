@@ -1,9 +1,9 @@
 # Hi, I'm Imran!
 
 ### About me
-💼  I am a senior business analyst for ai and optimization.
+💼  I am a senior analyst & developer with 10+ years across data engineering, business intelligence, and machine learning.
 
-🔭 I’m currently working on deep learning based time-series forecasting.
+🔭 I’m currently building AI-powered pipelines and agents that turn unstructured feedback from LC Waikiki fashion retail stores into planning and merchandising decisions teams actually use. 
 
 🌱 I’m upskilling in AI. 
 
