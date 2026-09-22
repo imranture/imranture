@@ -3,7 +3,7 @@
 ### About me
 💼  I am a senior analyst & developer with 10+ years across data engineering, business intelligence, and machine learning.
 
-🔭 I’m currently building AI-powered pipelines and agents that turn unstructured feedback from LC Waikiki fashion retail stores into planning and merchandising decisions teams actually use. 
+🔭 I’m currently building AI pipelines and agents that turn messy data into clear decisions. 
 
 🌱 I’m upskilling in AI. 
 
