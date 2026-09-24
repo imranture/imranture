@@ -1,7 +1,7 @@
 # Hi, I'm Imran!
 
 ### About me
-💼  I am a senior analyst & developer with 10+ years across data engineering, business intelligence, and machine learning.
+💼 I'm a Data Scientist & AI Developer with 10+ years across analytics, research, and engineering, from machine learning to LLMs and agentic systems.
 
 🔭 I’m currently building AI pipelines and agents that turn messy data into clear decisions. 
 
