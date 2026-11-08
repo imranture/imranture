@@ -546,16 +546,34 @@ def _desk_and_monitor(commits):
     b.append(r(206, 200, 40, 4, "#f2c94c"))
     b.append(r(210, 216, 32, 2, "#ffe08a"))
 
-    # mug + steam
-    b.append(r(520, 248, 18, 20, "#e6e1d6"))
-    b.append(r(520, 248, 18, 3, "#5a3a2a"))
-    b.append(r(538, 252, 6, 2, "#e6e1d6"))
-    b.append(r(542, 252, 2, 10, "#e6e1d6"))
-    b.append(r(538, 260, 6, 2, "#e6e1d6"))
-    b.append(r(524, 256, 10, 6, "#d9534f"))
-    for sx, delay in [(522, 0), (528, -1), (534, -2)]:
+    # Turkish tea: tulip-shaped (ince belli) glass with a spoon, on a white saucer
+    b.append(r(506, 264, 48, 2, "#f2f2f2"))           # saucer rim
+    b.append(r(510, 266, 40, 2, "#bdbdbd"))           # saucer underside
+    glass = [
+        ".btttttttttb.",   # flared rim
+        ".bwtttttthdb.",
+        "..bwtttttdb..",
+        "...bttttdb...",   # waist
+        "...bttttdb...",
+        "...bwtttdb...",
+        "..bwhtttddb..",
+        ".bwhhttttddb.",   # round belly
+        ".bwhhttttddb.",
+        ".bwhtttttddb.",
+        "..btttttddb..",
+        "..ooooooooo..",   # thick glass base
+    ]
+    gx, gy = 517, 264 - 2 * len(glass)
+    b.append(pixmap(glass, gx, gy, 2, {
+        "b": "#a9d4fb", "o": "#d6ebff", "t": "#d7322a", "d": "#a3211b",
+        "h": "#f07a3c", "w": "#ffffff"}))
+    b.append(r(gx + 2, gy - 1, 22, 1, "#d6ebff", 'fill-opacity=".8"'))   # thin rim line
+    spoon = [(521, 238), (519, 236), (517, 234), (515, 232)]
+    for i, (sx, sy) in enumerate(spoon):
+        b.append(r(sx, sy, 2, 2, "#c7ced6" if i == len(spoon) - 1 else "#9aa3ad"))  # spoon handle
+    for sx, delay in [(526, 0), (531, -1), (536, -2)]:
         b.append(f'<g class="steam" style="animation-delay:{delay}s">'
-                 f'{r(sx, 236, 4, 4, "#d8dee9")}{r(sx + 2, 228, 4, 4, "#d8dee9")}</g>')
+                 f'{r(sx, 230, 4, 4, "#d8dee9")}{r(sx + 2, 222, 4, 4, "#d8dee9")}</g>')
 
     # workstation tower under the desk, busy training
     b.append(r(228, 300, 40, 60, "#2b3040"))
