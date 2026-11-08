@@ -2,11 +2,19 @@
   <img src="assets/banner.svg" width="100%" alt="Animated pixel-art room: a neon name sign, a terminal scrolling my latest commits, clouds drifting past the window and a cat asleep on the rug">
 </p>
 
-Hi, I'm **YOUR NAME** 👋 — one or two lines about what you build and what you're learning.
+👋 Hi, I'm **Imran**!
 
-The monitor scrolls my latest commits, and the top shelf holds a book for each language I use most.
+💼 I'm a Data Scientist & AI Developer with 10+ years across analytics, research, and engineering, from machine learning to LLMs and agentic systems.
 
-[GitHub](https://github.com/YOUR-USERNAME) · [Website](https://your-website.example)
+🔭 I’m currently building AI pipelines and agents that turn messy data into clear decisions. 
+
+🌱 I’m upskilling in AI. 
+
+😮 Fun fact! I've lived on four continents and in five countries, so far. 
+
+📫 You can reach me by imran at alumni.rutgers.edu
+
+[GitHub](https://github.com/imranture) · [Website](https://www.imranture.com/)
 
 <img src="assets/stats.svg" width="100%" alt="GitHub stats">
 
