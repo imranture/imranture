@@ -14,11 +14,11 @@ The monitor scrolls my latest commits, and the top shelf holds a book for each l
 
 <!-- PROJECTS:START -->
 <p>
-  <a href="https://github.com"><img src="assets/project-1.svg" width="49%" alt="pixel-room"></a>
-  <a href="https://github.com"><img src="assets/project-2.svg" width="49%" alt="data-tools"></a>
+  <a href="https://github.com/imranture/E4-TimeStamper"><img src="assets/project-1.svg" width="49%" alt="E4-TimeStamper"></a>
+  <a href="https://github.com/imranture/OpenIntroStats-Python"><img src="assets/project-2.svg" width="49%" alt="OpenIntroStats-Python"></a>
 </p>
 <p>
-  <a href="https://github.com"><img src="assets/project-3.svg" width="49%" alt="notes"></a>
-  <a href="https://github.com"><img src="assets/project-4.svg" width="49%" alt="stats-exercises"></a>
+  <a href="https://github.com/imranture/DurCalc"><img src="assets/project-3.svg" width="49%" alt="DurCalc"></a>
+  <a href="https://github.com/imranture/practice_stats"><img src="assets/project-4.svg" width="49%" alt="practice_stats"></a>
 </p>
 <!-- PROJECTS:END -->
