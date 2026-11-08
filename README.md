@@ -14,7 +14,9 @@
 
 📫 You can reach me by imran at alumni.rutgers.edu
 
-[GitHub](https://github.com/imranture) · [Website](https://www.imranture.com/)
+[Website](https://www.imranture.com/) · [LinkedIn](https://linkedin.com/in/imranture)
+
+[![BuyMeATea](https://img.shields.io/badge/Buy%20Me%20a%20Tea-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/imran)<br/> 
 
 <img src="assets/stats.svg" width="100%" alt="GitHub stats">
 
@@ -30,4 +32,3 @@
   <a href="https://github.com/imranture/practice_stats"><img src="assets/project-4.svg" width="49%" alt="practice_stats"></a>
 </p>
 <!-- PROJECTS:END -->
-
