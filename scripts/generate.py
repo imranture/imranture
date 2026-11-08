@@ -344,7 +344,7 @@ def _sign(name):
     ]
     b.append(
         f'<g class="neon" filter="url(#glow)">'
-        + pixel_text(name, bx + pad_x, by + pad_y, s, "#ff6fae")
+        + pixel_text(name, bx + pad_x, by + pad_y, s, "#5ce1e6")
         + "</g>"
     )
     return "".join(b)
