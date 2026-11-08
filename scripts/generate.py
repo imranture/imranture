@@ -787,6 +787,10 @@ def card_svg(repo):
 # --------------------------------------------------------------------------- #
 # Data
 # --------------------------------------------------------------------------- #
+HISTORY = """defaultBranchRef { target { ... on Commit {
+          history(first: 10) { nodes { abbreviatedOid messageHeadline committedDate
+                                       author { user { login } } } } } } }"""
+
 QUERY = """
 query($login: String!) {
   user(login: $login) {
@@ -797,8 +801,9 @@ query($login: String!) {
       restrictedContributionsCount
       contributionCalendar { weeks { contributionDays { date contributionCount } } }
     }
-    pinnedItems(first: 4, types: REPOSITORY) {
-      nodes { ... on Repository { name description url stargazerCount primaryLanguage { name color } } }
+    pinnedItems(first: 6, types: REPOSITORY) {
+      nodes { ... on Repository { name description url stargazerCount primaryLanguage { name color }
+                                  HISTORY } }
     }
     top: repositories(first: 100, ownerAffiliations: OWNER, isFork: false,
                       orderBy: {field: STARGAZERS, direction: DESC}) {
@@ -808,28 +813,40 @@ query($login: String!) {
     }
     recent: repositories(first: 8, ownerAffiliations: OWNER,
                          orderBy: {field: PUSHED_AT, direction: DESC}) {
-      nodes { name
-        defaultBranchRef { target { ... on Commit {
-          history(first: 10) { nodes { abbreviatedOid messageHeadline committedDate
-                                       author { user { login } } } } } } } }
+      nodes { name HISTORY }
     }
   }
 }
-"""
+""".replace("HISTORY", HISTORY)
 
 
-def graphql(token, login):
+def graphql(token, query, variables=None, allow_partial=False):
     req = urllib.request.Request(
         "https://api.github.com/graphql",
-        data=json.dumps({"query": QUERY, "variables": {"login": login}}).encode(),
+        data=json.dumps({"query": query, "variables": variables or {}}).encode(),
         headers={"Authorization": f"bearer {token}", "User-Agent": "pixel-profile-generator",
                  "Content-Type": "application/json"},
     )
     with urllib.request.urlopen(req, timeout=30) as resp:
         payload = json.load(resp)
     if payload.get("errors"):
-        raise SystemExit(f"GitHub API error: {payload['errors']}")
-    return payload["data"]["user"]
+        if not allow_partial or not payload.get("data"):
+            raise SystemExit(f"GitHub API error: {payload['errors']}")
+        for err in payload["errors"]:
+            print(f"warning: {err.get('message')}", file=sys.stderr)
+    return payload["data"]
+
+
+def fetch_commit_repos(token, login, names):
+    """Commit history for the repos listed in "commit_repos" ("repo" or "owner/repo")."""
+    parts = []
+    for i, item in enumerate(names):
+        owner, _, name = item.strip().rpartition("/")
+        owner = owner or login
+        parts.append(f"r{i}: repository(owner: {json.dumps(owner)}, name: {json.dumps(name)}) "
+                     f"{{ name {HISTORY} }}")
+    data = graphql(token, "query {\n" + "\n".join(parts) + "\n}", allow_partial=True)
+    return [data[f"r{i}"] for i in range(len(names)) if data.get(f"r{i}")]
 
 
 def best_streak(days):
@@ -850,7 +867,7 @@ def repo_card_data(node):
     }
 
 
-def build_data(cfg, user):
+def build_data(cfg, user, commit_repos=None):
     login = user["login"]
     cc = user["contributionsCollection"]
     days = [d for w_ in cc["contributionCalendar"]["weeks"] for d in w_["contributionDays"]]
@@ -866,8 +883,15 @@ def build_data(cfg, user):
     languages = [{"name": n, "color": lang_color[n]}
                  for n, _ in sorted(lang_size.items(), key=lambda kv: -kv[1])]
 
+    # Terminal commits: repos from "commit_repos" in the config, else your pinned repos,
+    # else your most recently pushed repos.
+    pinned_nodes = [n for n in user["pinnedItems"]["nodes"] if n]
+    if commit_repos is not None:
+        sources = commit_repos
+    else:
+        sources = pinned_nodes or user["recent"]["nodes"]
     commits = []
-    for repo in user["recent"]["nodes"]:
+    for repo in sources:
         ref = repo.get("defaultBranchRef")
         if not ref or not ref.get("target") or "history" not in ref["target"]:
             continue
@@ -886,8 +910,8 @@ def build_data(cfg, user):
     if wanted:
         projects = [repo_card_data(by_name[n.lower()]) for n in wanted if n.lower() in by_name]
     else:
-        pinned = [n for n in user["pinnedItems"]["nodes"] if n]
-        projects = [repo_card_data(n) for n in pinned] or [repo_card_data(n) for n in repos[:4]]
+        projects = ([repo_card_data(n) for n in pinned_nodes]
+                    or [repo_card_data(n) for n in repos[:4]])
 
     return {
         "display_name": cfg.get("display_name") or user.get("name") or login,
@@ -1087,7 +1111,10 @@ def main():
         if not token or not login or login == "your-username":
             raise SystemExit("Set GH_TOKEN and your username (profile.config.json or GH_USER), "
                              "or run with --demo.")
-        data = build_data(cfg, graphql(token, login))
+        user = graphql(token, QUERY, {"login": login})["user"]
+        wanted = [n for n in (cfg.get("commit_repos") or []) if str(n).strip()]
+        extra = fetch_commit_repos(token, login, wanted) if wanted else None
+        data = build_data(cfg, user, extra)
 
     data["books"] = pick_books(cfg, data["languages"])
 
