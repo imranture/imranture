@@ -2,5 +2,25 @@
   "username": "imranture",
   "display_name": "Imran Ture",
   "projects": [],
-  "commit_lines": 10
+  "commit_lines": 10,
+  "books": [
+  {"name": "Python",       "color": "#3670A0"},
+  {"name": "NumPy",        "color": "#013243"},
+  {"name": "Pandas",       "color": "#150458"},
+  {"name": "SciPy",        "color": "#0C55A5"},
+  {"name": "scikit-learn", "color": "#F7931E"},
+  {"name": "Keras",        "color": "#D00000"},
+  {"name": "TensorFlow",   "color": "#FF6F00"},
+  {"name": "Matplotlib",   "color": "#FFFFFF"},
+  {"name": "seaborn",      "color": "#5F4F75"},
+  {"name": "Tableau",      "color": "#E97627"},
+  {"name": "Plotly",       "color": "#3F4F75"},
+  {"name": "MySQL",        "color": "#4479A1"},
+  {"name": "PostgreSQL",   "color": "#4169E1"},
+  {"name": "R",            "color": "#276DC3"},
+  {"name": "Jupyter",      "color": "#F37626"},
+  {"name": "django",       "color": "#092E20"},
+  {"name": "streamlit",    "color": "#FF4B4B"},
+  {"name": "Excel",        "color": "#217346"}
+]
 }

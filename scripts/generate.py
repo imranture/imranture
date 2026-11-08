@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import unicodedata
+import urllib.parse
 import urllib.request
 from html import escape
 from pathlib import Path
@@ -198,7 +199,7 @@ FLOOR_Y = 360
 def scene_banner(data):
     name = data["display_name"]
     commits = data["commits"]
-    languages = data["languages"][:6]
+    books = data["books"]
 
     style = """
     .cloud{animation:drift linear infinite}
@@ -211,6 +212,10 @@ def scene_banner(data):
     @keyframes wag{0%,60%{transform:rotate(0)}70%,90%{transform:rotate(-14deg)}}
     .breathe{animation:breathe 3.2s steps(2) infinite}
     @keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+    .led{animation:led 1.3s steps(1) infinite}
+    @keyframes led{0%,30%,55%{opacity:1}20%,45%,80%{opacity:.15}}
+    .gpu{animation:gpu 2.6s ease-in-out infinite}
+    @keyframes gpu{0%,100%{opacity:.55}50%{opacity:1}}
     .neon{animation:flicker 7s infinite}
     @keyframes flicker{0%,18%,22%,24%,100%{opacity:1}20%,23%{opacity:.35}}
     .sec{transform-box:view-box;transform-origin:88px 100px;animation:spin 60s steps(60) infinite}
@@ -246,15 +251,17 @@ def scene_banner(data):
         for sx in range(off + 40, W, 140):
             b.append(r(sx, yy, 2, 20, "#4a2f21"))
 
-    # rug
-    b.append(r(604, 380, 216, 28, "#7a3b52"))
-    b.append(r(596, 384, 232, 20, "#7a3b52"))
-    b.append(r(612, 388, 200, 4, "#9b4d68"))
-    b.append(r(612, 396, 200, 2, "#9b4d68"))
-    for fx in range(598, 828, 8):
+    b.append(_carpet())
+
+    # cat's bed
+    b.append(r(652, 380, 120, 28, "#7a3b52"))
+    b.append(r(644, 384, 136, 20, "#7a3b52"))
+    b.append(r(656, 388, 112, 4, "#9b4d68"))
+    b.append(r(656, 396, 112, 2, "#9b4d68"))
+    for fx in range(646, 778, 8):
         b.append(r(fx, 408, 4, 4, "#c7a27a"))
 
-    b.append(_bookcase(languages))
+    b.append(_bookcase(books))
     b.append(_clock())
     b.append(_sign(name))
     b.append(_window())
@@ -265,49 +272,113 @@ def scene_banner(data):
     return svg_doc(W, H, body, style, f"{name}'s pixel room", defs)
 
 
-def _bookcase(languages):
+def _carpet():
+    """Kilim-style carpet in the middle of the floor."""
+    w, h = 280, 52
+    x0, y0 = (196 + 572) // 2 - w // 2, 376   # centred under the desk (desk spans x 196-572)
+    b = [
+        r(x0, y0, w, h, "#6e2828"),                      # outer edge
+        r(x0 + 4, y0 + 4, w - 8, h - 8, "#d9a441"),      # mustard border
+        r(x0 + 8, y0 + 8, w - 16, h - 16, "#a13d3d"),    # red field
+    ]
+    # teal notches along the border
+    for nx in range(x0 + 12, x0 + w - 12, 16):
+        b.append(r(nx, y0 + 4, 4, 4, "#2f6f73"))
+        b.append(r(nx + 8, y0 + h - 8, 4, 4, "#2f6f73"))
+    # thin cream frame inside the field
+    fx0, fy0, fw, fh = x0 + 12, y0 + 12, w - 24, h - 24
+    b += [r(fx0, fy0, fw, 2, "#efe6d2"), r(fx0, fy0 + fh - 2, fw, 2, "#efe6d2"),
+          r(fx0, fy0, 2, fh, "#efe6d2"), r(fx0 + fw - 2, fy0, 2, fh, "#efe6d2")]
+    # row of diamonds with dots between
+    diamond = ["..t..", ".tct.", "tcmct", ".tct.", "..t.."]
+    pal = {"t": "#2f6f73", "c": "#efe6d2", "m": "#d9a441"}
+    cy = y0 + h // 2
+    centers = [x0 + w // 2 + k * 50 for k in (-2, -1, 0, 1, 2)]
+    for cx in centers:
+        b.append(pixmap(diamond, cx - 10, cy - 10, 4, pal))
+    for a, c in zip(centers, centers[1:]):
+        b.append(r((a + c) // 2 - 2, cy - 2, 4, 4, "#d9a441"))
+    # fringe on both ends
+    for fy in range(y0 + 2, y0 + h - 2, 6):
+        b.append(r(x0 - 8, fy, 8, 2, "#efe6d2"))
+        b.append(r(x0 + w, fy, 8, 2, "#efe6d2"))
+    return "".join(b)
+
+
+def _luma(hex_color):
+    h = hex_color.lstrip("#")
+    r_, g_, b_ = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return 0.2126 * r_ + 0.7152 * g_ + 0.0722 * b_
+
+
+def _bookcase(books):
+    """Bookcase whose books carry the names of the technologies you use on their spines."""
     b = []
-    x0, y0, w, h = 28, 168, 124, FLOOR_Y - 168
+    x0, y0, w = 20, 136, 156
+    h = FLOOR_Y - y0
     b.append(r(x0, y0, w, h, "#6b4430"))
     b.append(r(x0 + 8, y0 + 8, w - 16, h - 8, "#3e271b"))
     b.append(r(x0 - 4, y0 - 4, w + 8, 8, "#7d5139"))
-    shelves = [y0 + 52, y0 + 104, y0 + 152]
+    shelves = [y0 + 74, y0 + 144, y0 + 214]          # bottom edge of each row of books
     for sy in shelves:
         b.append(r(x0 + 8, sy, w - 16, 6, "#7d5139"))
 
-    # top shelf: one book per language
-    bx = x0 + 12
-    heights = [36, 32, 40, 34, 38, 30]
-    for i, lang in enumerate(languages):
-        bw = 14
-        bh = heights[i % len(heights)]
-        col = lang["color"] or "#8b949e"
-        b.append(r(bx, shelves[0] - bh, bw, bh, col))
-        b.append(r(bx, shelves[0] - bh + 6, bw, 2, shade(col, 0.7)))
-        b.append(r(bx, shelves[0] - 10, bw, 2, shade(col, 0.7)))
-        b.append(r(bx + bw - 2, shelves[0] - bh, 2, bh, shade(col, 0.8)))
-        bx += bw + 2
-    # leaning book if room
-    if bx < x0 + w - 24:
-        b.append(f'<g transform="rotate(14 {bx + 8} {shelves[0]})">'
-                 + r(bx + 2, shelves[0] - 34, 12, 34, "#58627a") + "</g>")
+    heights = [56, 50, 60, 52, 58, 48, 54, 50]
+    bw, gap = 14, 2
+    per_shelf = (w - 24) // (bw + gap)
+    rows = [books[i:i + per_shelf] for i in range(0, len(books), per_shelf)][: len(shelves)]
+    k = 0
+    last_x = {}
+    for shelf_i, row in enumerate(rows):
+        bx = x0 + 12
+        for book in row:
+            name = book["name"]
+            est = len(name) * 4.6                      # rough width of the spine text
+            bh = min(60, max(heights[k % len(heights)], int(est) + 16))
+            k += 1
+            col = book.get("color") or "#8b949e"
+            top = shelves[shelf_i] - bh
+            b.append(r(bx, top, bw, bh, col))
+            b.append(r(bx, top, bw, 2, shade(col, 1.35)))
+            b.append(r(bx, shelves[shelf_i] - 8, bw, 2, shade(col, 0.7)))
+            b.append(r(bx + bw - 2, top, 2, bh, shade(col, 0.8)))
+            # spine title, reading top to bottom; squeezed only if it would not fit
+            avail = bh - 14
+            fit = f' textLength="{avail}" lengthAdjust="spacingAndGlyphs"' if est > avail else ""
+            ink = "#1b2130" if _luma(col) > 0.6 else "#f5f1e8"
+            cx = bx + (bw - 2) / 2
+            cy = top + 4 + avail / 2
+            b.append(
+                f'<text transform="translate({cx:.1f} {cy:.1f}) rotate(90)" text-anchor="middle" '
+                f'dominant-baseline="central" font-family="{SANS}" font-size="7.5" font-weight="700" '
+                f'fill="{ink}"{fit}>{escape(name)}</text>'
+            )
+            bx += bw + gap
+        last_x[shelf_i] = bx
 
-    # middle shelf: stacked books + small succulent
-    stack = ["#4f8a8b", "#b5566a", "#d9a441", "#5c6bc0"]
-    for i, c in enumerate(stack):
-        b.append(r(x0 + 14 + (i % 2) * 2, shelves[1] - 8 * (i + 1), 44, 8, c))
-        b.append(r(x0 + 14 + (i % 2) * 2, shelves[1] - 8 * (i + 1), 4, 8, shade(c, 0.75)))
-    b.append(r(x0 + 80, shelves[1] - 16, 24, 16, "#c0714f"))
-    b.append(r(x0 + 80, shelves[1] - 16, 24, 4, "#d88a64"))
-    b.append(pixmap(["..g..", ".ggg.", "ggggg", ".g.g."], x0 + 82, shelves[1] - 32, 4,
-                    {"g": "#58a65c"}))
+    def free(shelf_i):
+        return x0 + w - 12 - last_x.get(shelf_i, x0 + 12)
 
-    # bottom shelf: a crate and a game console-ish box
-    b.append(r(x0 + 14, shelves[2] - 28, 40, 28, "#8a6a4a"))
-    b.append(r(x0 + 14, shelves[2] - 16, 40, 2, "#6b4f36"))
-    b.append(r(x0 + 62, shelves[2] - 18, 44, 18, "#2b3040"))
-    b.append(r(x0 + 66, shelves[2] - 14, 8, 4, "#3fb950"))
-    b.append(r(x0 + 92, shelves[2] - 10, 10, 4, "#58627a"))
+    # fill leftover space with props, only where they fit
+    sx = last_x.get(0, x0 + 12)
+    if free(0) >= 20:
+        b.append(f'<g transform="rotate(14 {sx + 8} {shelves[0]})">'
+                 + r(sx + 2, shelves[0] - 48, 12, 48, "#58627a") + "</g>")
+    if free(1) >= 30:
+        px = x0 + w - 12 - 28
+        b.append(r(px, shelves[1] - 16, 24, 16, "#c0714f"))
+        b.append(r(px, shelves[1] - 16, 24, 4, "#d88a64"))
+        b.append(pixmap(["..g..", ".ggg.", "ggggg", ".g.g."], px + 2, shelves[1] - 32, 4,
+                        {"g": "#58a65c"}))
+    if 1 not in last_x:
+        stack = ["#4f8a8b", "#b5566a", "#d9a441", "#5c6bc0"]
+        for i, c in enumerate(stack):
+            b.append(r(x0 + 14 + (i % 2) * 2, shelves[1] - 8 * (i + 1), 44, 8, c))
+            b.append(r(x0 + 14 + (i % 2) * 2, shelves[1] - 8 * (i + 1), 4, 8, shade(c, 0.75)))
+    if free(2) >= 48:
+        cx = x0 + w - 12 - 44
+        b.append(r(cx, shelves[2] - 28, 40, 28, "#8a6a4a"))
+        b.append(r(cx, shelves[2] - 16, 40, 2, "#6b4f36"))
     return "".join(b)
 
 
@@ -418,7 +489,7 @@ def _desk_and_monitor(commits):
     for i, c in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
         b.append(r(276 + i * 8, 124, 4, 4, c))
     b.append(f'<text x="384" y="129" text-anchor="middle" font-family="{MONO}" font-size="7" '
-             f'fill="#6e7681">~/code — zsh</text>')
+             f'fill="#6e7681">~/ml — zsh</text>')
     b.append(r(372, 252, 24, 10, "#2e3447"))
     b.append(r(350, 262, 68, 6, "#3a4256"))
 
@@ -486,10 +557,15 @@ def _desk_and_monitor(commits):
         b.append(f'<g class="steam" style="animation-delay:{delay}s">'
                  f'{r(sx, 236, 4, 4, "#d8dee9")}{r(sx + 2, 228, 4, 4, "#d8dee9")}</g>')
 
-    # bin under desk
-    b.append(r(232, 324, 28, 36, "#3a4256"))
-    b.append(r(228, 320, 36, 6, "#4a5470"))
-    b.append(r(240, 316, 8, 6, "#e6e1d6"))
+    # workstation tower under the desk, busy training
+    b.append(r(228, 300, 40, 60, "#2b3040"))
+    b.append(r(228, 300, 40, 2, "#3a4256"))
+    b.append(r(232, 306, 4, 48, "#1b2130"))
+    b.append(f'<g class="gpu">{r(240, 310, 22, 34, "#3d2a6b")}{r(242, 326, 18, 4, "#a371f7")}'
+             f'{r(242, 334, 18, 2, "#a371f7")}</g>')
+    b.append(r(240, 310, 22, 2, "#4a5470"))
+    b.append(r(242, 350, 4, 4, "#3fb950"))
+    b.append(f'<g class="led">{r(250, 350, 4, 4, "#e3b341")}</g>')
     return "".join(b)
 
 
@@ -795,6 +871,127 @@ def demo_data(cfg):
 
 
 # --------------------------------------------------------------------------- #
+# Skill badges -> bookshelf
+# --------------------------------------------------------------------------- #
+_NAMED = {"brightgreen": "#44cc11", "green": "#97ca00", "yellow": "#dfb317", "orange": "#fe7d37",
+          "red": "#e05d44", "blue": "#007ec6", "lightgrey": "#9f9f9f", "grey": "#555555",
+          "black": "#000000", "white": "#ffffff"}
+
+
+def readme_badges(text):
+    """Read shields.io badges (img.shields.io/badge/LABEL-COLOR) from the README, in order."""
+    books, seen = [], set()
+    for path in re.findall(r"img\.shields\.io/badge/([^)\"'\s?]+)", text):
+        parts = re.split(r"(?<!-)-(?!-)", path)
+        if len(parts) < 2:
+            continue
+        name = urllib.parse.unquote(parts[0]).replace("--", "-").replace("__", "\0")
+        name = name.replace("_", " ").replace("\0", "_").strip()
+        color = urllib.parse.unquote(parts[-1]).removesuffix(".svg").lstrip("#").lower()
+        if re.fullmatch(r"[0-9a-f]{6}", color):
+            color = "#" + color
+        elif re.fullmatch(r"[0-9a-f]{3}", color):
+            color = "#" + "".join(c * 2 for c in color)
+        else:
+            color = _NAMED.get(color)
+        if name and name.lower() not in seen:
+            seen.add(name.lower())
+            books.append({"name": name, "color": color})
+    return books
+
+
+# Approximate brand colours for common technologies, used when a book has no colour of its
+# own and no matching README badge. Keys are normalised with _tech_key(). Add your own freely.
+BRAND_COLORS = {
+    "python": "#3776AB", "javascript": "#F7DF1E", "js": "#F7DF1E", "typescript": "#3178C6",
+    "ts": "#3178C6", "java": "#ED8B00", "c": "#A8B9CC", "c++": "#00599C", "cpp": "#00599C",
+    "c#": "#239120", "csharp": "#239120", "go": "#00ADD8", "golang": "#00ADD8",
+    "rust": "#DEA584", "ruby": "#CC342D", "php": "#777BB4", "swift": "#F05138",
+    "kotlin": "#7F52FF", "r": "#276DC3", "julia": "#9558B2", "scala": "#DC322F",
+    "matlab": "#E16737", "sql": "#4479A1", "bash": "#4EAA25", "shell": "#4EAA25",
+    "html": "#E34F26", "html5": "#E34F26", "css": "#1572B6", "css3": "#1572B6",
+    "react": "#61DAFB", "vue": "#4FC08D", "vuejs": "#4FC08D", "angular": "#DD0031",
+    "svelte": "#FF3E00", "nextjs": "#000000", "nodejs": "#339933", "node": "#339933",
+    "tailwind": "#06B6D4", "tailwindcss": "#06B6D4", "graphql": "#E10098",
+    "django": "#092E20", "flask": "#000000", "fastapi": "#009688", "streamlit": "#FF4B4B",
+    "numpy": "#013243", "pandas": "#150458", "polars": "#CD792C", "scipy": "#0C55A5",
+    "scikitlearn": "#F7931E", "sklearn": "#F7931E", "tensorflow": "#FF6F00",
+    "keras": "#D00000", "pytorch": "#EE4C2C", "opencv": "#5C3EE8", "matplotlib": "#11557C",
+    "plotly": "#3F4F75", "seaborn": "#5F4F75", "jupyter": "#F37626", "tableau": "#E97627",
+    "powerbi": "#F2C811", "excel": "#217346", "huggingface": "#FFD21E",
+    "langchain": "#1C3C3C", "openai": "#412991", "mysql": "#4479A1",
+    "postgresql": "#4169E1", "postgres": "#4169E1", "sqlite": "#003B57",
+    "mongodb": "#47A248", "redis": "#DC382D", "snowflake": "#29B5E8",
+    "databricks": "#FF3621", "spark": "#E25A1C", "apachespark": "#E25A1C",
+    "airflow": "#017CEE", "apacheairflow": "#017CEE", "hadoop": "#66CCFF", "dbt": "#FF694B",
+    "docker": "#2496ED", "kubernetes": "#326CE5", "k8s": "#326CE5", "aws": "#FF9900",
+    "gcp": "#4285F4", "googlecloud": "#4285F4", "azure": "#0078D4", "firebase": "#FFCA28",
+    "git": "#F05032", "github": "#181717", "linux": "#FCC624", "figma": "#F24E1E",
+}
+
+
+def _tech_key(name):
+    return re.sub(r"[^a-z0-9+#]", "", name.lower())
+
+
+def _hash_color(name):
+    """A stable, pleasant colour derived from the name, so a tech keeps its colour
+    no matter where it sits in the list."""
+    hue = int(hashlib.md5(_tech_key(name).encode()).hexdigest()[:4], 16) % 360
+    s, l_ = 0.55, 0.45
+    c = (1 - abs(2 * l_ - 1)) * s
+    x = c * (1 - abs((hue / 60) % 2 - 1))
+    m = l_ - c / 2
+    r_, g_, b_ = [(c, x, 0), (x, c, 0), (0, c, x), (0, x, c), (x, 0, c), (c, 0, x)][hue // 60]
+    return "#" + "".join(f"{round((v + m) * 255):02x}" for v in (r_, g_, b_))
+
+
+def _valid_hex(color):
+    if not isinstance(color, str):
+        return None
+    h = color.strip().lstrip("#")
+    if re.fullmatch(r"[0-9a-fA-F]{3}", h):
+        h = "".join(ch * 2 for ch in h)
+    return "#" + h if re.fullmatch(r"[0-9a-fA-F]{6}", h) else None
+
+
+def book_color(name, explicit=None, badge_color=None):
+    """Colour for one book, first match wins:
+    1. "color" given for it in profile.config.json
+    2. the README badge with the same name
+    3. the built-in BRAND_COLORS table
+    4. a stable colour generated from the name
+    """
+    key = _tech_key(name)
+    return (_valid_hex(explicit)
+            or (badge_color or {}).get(key)
+            or BRAND_COLORS.get(key)
+            or _hash_color(name))
+
+
+def pick_books(cfg, languages):
+    """Books on the shelf, first non-empty source wins:
+    1. "books" in profile.config.json: names ("Python") or {"name": "Python", "color": "#3776AB"}
+    2. the shields.io badges in README.md
+    3. your top GitHub languages
+    """
+    badges = readme_badges(README.read_text(encoding="utf-8")) if README.exists() else []
+    badge_color = {_tech_key(b_["name"]): b_["color"] for b_ in badges if b_["color"]}
+    books = []
+    for item in cfg.get("books") or []:
+        if isinstance(item, str):
+            item = {"name": item}
+        name = str(item.get("name", "")).strip()
+        if name:
+            books.append({"name": name, "color": book_color(name, item.get("color"), badge_color)})
+    if books:
+        return books
+    if badges:
+        return [{"name": b_["name"], "color": book_color(b_["name"], b_["color"])} for b_ in badges]
+    return [{"name": l_["name"], "color": book_color(l_["name"], l_["color"])} for l_ in languages[:6]]
+
+
+# --------------------------------------------------------------------------- #
 # README block
 # --------------------------------------------------------------------------- #
 def update_readme(projects):
@@ -826,6 +1023,8 @@ def main():
             raise SystemExit("Set GH_TOKEN and your username (profile.config.json or GH_USER), "
                              "or run with --demo.")
         data = build_data(cfg, graphql(token, login))
+
+    data["books"] = pick_books(cfg, data["languages"])
 
     ASSETS.mkdir(exist_ok=True)
     (ASSETS / "banner.svg").write_text(scene_banner(data), encoding="utf-8")
