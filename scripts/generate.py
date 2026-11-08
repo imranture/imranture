@@ -513,9 +513,9 @@ def _desk_and_monitor(commits):
         for i, ln in enumerate(lines):
             y = 146 + (copy * n + i) * lh
             text_rows.append(f'<text x="276" y="{y}" xml:space="preserve">{ln}</text>')
-    dur = n * 1.6
+    dur = n * 3.0                       # seconds per full loop: slow, continuous scroll
     anim = (f"@keyframes scroll{{from{{transform:translateY(0)}}to{{transform:translateY(-{n * lh}px)}}}}")
-    b.append(f"<style>{anim}.log{{animation:scroll {dur:.1f}s steps({n}) infinite}}</style>")
+    b.append(f"<style>{anim}.log{{animation:scroll {dur:.1f}s linear infinite}}</style>")
     b.append(
         f'<g clip-path="url(#term)"><g class="log" font-family="{MONO}" font-size="9.5" '
         f'shape-rendering="auto">{"".join(text_rows)}</g></g>'
