@@ -403,9 +403,9 @@ def _sign(name):
         s -= 1
     tw = pixel_text_width(name, s)
     th = 7 * s
-    pad_x, pad_y = 22, 16
+    pad_x, pad_y = 22, 12
     bw, bh = tw + 2 * pad_x, th + 2 * pad_y
-    bx, by = cx - bw // 2, 34
+    bx, by = cx - bw // 2, 22          # leaves ~18px between the sign and the monitor
     b = [
         # hanging wires
         r(bx + 24, 0, 2, by, "#4a4066"), r(bx + bw - 26, 0, 2, by, "#4a4066"),
@@ -547,8 +547,8 @@ def _desk_and_monitor(commits):
     b.append(r(210, 216, 32, 2, "#ffe08a"))
 
     # Turkish tea: tulip-shaped (ince belli) glass with a spoon, on a white saucer
-    b.append(r(506, 264, 48, 2, "#f2f2f2"))           # saucer rim
-    b.append(r(510, 266, 40, 2, "#bdbdbd"))           # saucer underside
+    b.append(r(513, 264, 34, 2, "#f2f2f2"))           # saucer rim
+    b.append(r(516, 266, 28, 2, "#bdbdbd"))           # saucer underside
     glass = [
         ".btttttttttb.",   # flared rim
         ".bwtttttthdb.",
@@ -584,6 +584,53 @@ def _desk_and_monitor(commits):
     b.append(r(240, 310, 22, 2, "#4a5470"))
     b.append(r(242, 350, 4, 4, "#3fb950"))
     b.append(f'<g class="led">{r(250, 350, 4, 4, "#e3b341")}</g>')
+
+    b.append(_chair())
+    return "".join(b)
+
+
+def _chair():
+    """Ergonomic office chair in side view, facing right toward the desk."""
+    shell, body, hi, accent = "#232736", "#3b4157", "#58617f", "#3aa6ab"
+    metal, chrome, wheel = "#1b1f2c", "#c3cad6", "#151824"
+    b = []
+    # backrest: reclines slightly, with a rounded headrest and a lumbar curve
+    top, bottom = 246, 308
+    for y in range(top, bottom, 2):
+        lean = round((bottom - y) * 0.13 / 2) * 2
+        i = (y - top) // 2
+        width = 16 if i == 0 else 20 if i == 1 else 22
+        if 18 <= i <= 25:
+            width += 2                                      # lumbar support
+        if i == 8:
+            width -= 2                                      # neck notch under headrest
+        xl = 350 - lean
+        b.append(r(xl, y, 2, 2, shell))                     # back shell
+        b.append(r(xl + 2, y, width - 4, 2, body))          # cushion
+        b.append(r(xl + 2 + (width - 4) // 2, y, (width - 4) - (width - 4) // 2, 2, "#454c66"))
+        b.append(r(xl + width - 2, y, 2, 2, hi))            # front highlight
+        if 2 <= i <= 27 and i != 8:
+            b.append(r(xl + 6, y, 2, 2, accent))            # accent piping
+    # seat cushion with rounded front edge
+    b.append(r(352, 304, 72, 2, hi))
+    b.append(r(348, 306, 80, 10, body))
+    b.append(r(428, 308, 2, 6, body))
+    b.append(r(350, 316, 76, 2, body))
+    b.append(r(354, 318, 68, 4, shell))
+    # tilt mechanism and gas lift
+    b.append(r(374, 322, 28, 6, metal))
+    b.append(r(384, 328, 8, 28, "#8a93a6"))
+    b.append(r(386, 328, 2, 14, chrome))
+    b.append(r(382, 342, 12, 14, shell))
+    # five-star base (side view): hub, two legs, front leg
+    b.append(r(378, 354, 20, 6, metal))
+    for x, y, w_ in [(366, 356, 12), (356, 358, 10), (398, 356, 12), (410, 358, 10)]:
+        b.append(r(x, y, w_, 4, metal))
+    # castor wheels
+    for wx, wy in [(350, 362), (384, 364), (418, 362)]:
+        b.append(r(wx + 2, wy, 6, 10, wheel))
+        b.append(r(wx, wy + 2, 10, 6, wheel))
+        b.append(r(wx + 4, wy + 4, 2, 2, "#4a5470"))
     return "".join(b)
 
 
