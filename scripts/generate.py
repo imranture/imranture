@@ -15,6 +15,7 @@ Usage:
   python scripts/generate.py --demo                     # sample data, no network
 """
 
+import datetime as dt
 import hashlib
 import json
 import math
@@ -199,6 +200,7 @@ def scene_banner(data):
     name = data["display_name"]
     commits = data["commits"]
     languages = data["languages"][:6]
+    updated = data["updated"]
 
     style = """
     .cloud{animation:drift linear infinite}
@@ -216,6 +218,10 @@ def scene_banner(data):
     .sec{transform-box:view-box;transform-origin:88px 100px;animation:spin 60s steps(60) infinite}
     .min{transform-box:view-box;transform-origin:88px 100px;animation:spin 3600s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    .sway{transform-box:view-box;transform-origin:120px 164px;animation:sway 6s ease-in-out infinite}
+    @keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+    .cursor{animation:blink 1s steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
     """
 
     defs = """
@@ -261,6 +267,12 @@ def scene_banner(data):
     b.append(_desk_and_monitor(commits))
     b.append(_cat())
 
+    # footer
+    b.append(
+        f'<text x="{W - 12}" y="{H - 10}" text-anchor="end" font-family="{MONO}" '
+        f'font-size="10" fill="#c7a27a" fill-opacity=".55">updated {escape(updated)}</text>'
+    )
+
     body = "".join(b)
     return svg_doc(W, H, body, style, f"{name}'s pixel room", defs)
 
@@ -272,6 +284,12 @@ def _bookcase(languages):
     b.append(r(x0 + 8, y0 + 8, w - 16, h - 8, "#3e271b"))
     b.append(r(x0 - 4, y0 - 4, w + 8, 8, "#7d5139"))
     shelves = [y0 + 52, y0 + 104, y0 + 152]
+    # trailing plant on top of the bookcase (sways gently)
+    plant = (r(x0 + 76, y0 - 22, 32, 18, "#c0714f") + r(x0 + 72, y0 - 26, 40, 6, "#a5654a")
+             + pixmap(["..g.g.g...", ".ggggggg..", "gg.ggg.gg.", "g.......gg",
+                       "g.........g", "l.........g", "..........g", "..........l"],
+                      x0 + 70, y0 - 42, 4, {"g": "#58a65c", "l": "#3f7f45"}))
+    b.append(f'<g class="sway">{plant}</g>')
     for sy in shelves:
         b.append(r(x0 + 8, sy, w - 16, 6, "#7d5139"))
 
@@ -394,6 +412,30 @@ def _window():
         b.append(r(side + 8, y0 - 12, 4, h + 28, "#93394d"))
         b.append(r(side + 18, y0 - 12, 2, h + 28, "#93394d"))
     return "".join(b)
+
+
+def _hanging_plant():
+    vines = pixmap(
+        [
+            "...gg.g..g...",
+            "..ggggggggg..",
+            ".g.g..g..g.g.",
+            ".g.g..g..g...",
+            "g..g.....g...",
+            "g..g.....l...",
+            "l..l...........",
+            "...g.........",
+        ],
+        558, 70, 4, {"g": "#58a65c", "l": "#3f7f45"},
+    )
+    body = (
+        r(583, 0, 2, 42, "#4a4066")
+        + r(566, 42, 36, 4, "#a5654a")
+        + r(570, 46, 28, 18, "#c0714f")
+        + r(570, 52, 28, 2, "#a5654a")
+        + vines
+    )
+    return f'<g class="sway">{body}</g>'
 
 
 def _desk_and_monitor(commits):
@@ -821,6 +863,7 @@ def main():
                              "or run with --demo.")
         data = build_data(cfg, graphql(token, login))
 
+    data["updated"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
     ASSETS.mkdir(exist_ok=True)
     (ASSETS / "banner.svg").write_text(scene_banner(data), encoding="utf-8")
     (ASSETS / "stats.svg").write_text(stats_svg(data["stats"]), encoding="utf-8")
