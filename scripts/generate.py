@@ -489,7 +489,7 @@ def _desk_and_monitor(commits):
     for i, c in enumerate(["#ff5f56", "#ffbd2e", "#27c93f"]):
         b.append(r(276 + i * 8, 124, 4, 4, c))
     b.append(f'<text x="384" y="129" text-anchor="middle" font-family="{MONO}" font-size="7" '
-             f'fill="#6e7681">~/ml — zsh</text>')
+             f'fill="#6e7681">~/Users/imranture</text>')
     b.append(r(372, 252, 24, 10, "#2e3447"))
     b.append(r(350, 262, 68, 6, "#3a4256"))
 
